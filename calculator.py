@@ -45,6 +45,28 @@ def resolve_url(path):
 
         body = 'The difference is: {}'.format(str(operators[0] - sum(operators[1:])))#, str(type(sum(operators[1:])))
 
+    elif url[1] == 'multiply':
+        
+        for i in url[2:4]:
+
+            try:
+
+                i = int(i)
+                operators.append(i)
+
+            except ValueError:
+                url.remove(i)
+                body = "It looks like you used an invalid input!"
+
+                return body
+
+        product = operators[0]*operators[1]
+
+        product = str(product)
+
+        body = 'The product is: {}'.format(product)
+        #body = str(operators)
+
     else: 
         body = 'The URL is: {}'.format(url)
 

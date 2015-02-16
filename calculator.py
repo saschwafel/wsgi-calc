@@ -3,17 +3,50 @@
 body = None
 
 def resolve_url(path):
+
     url = path
-    url = list(url.split('/'))
 
     operators = []
+
     if url[1] == 'add':
 
-        #output = int(url[2]) + int(url)
+        for i in url[2:]:
+            try:
 
-        for i in range(2,-1):
-            operators.append(i)
-        body = operators
+                i = int(i)
+                operators.append(i)
+            except ValueError:
+                url.remove(i)
+
+                body = "It looks like you used an invalid input!"
+
+                return body
+
+        body = 'The list of operands is: {}, and the sum is: {}'.format(str(operators), str(sum(operators)))
+
+    elif url[1] == 'subtract':
+        
+        for i in url[2:]:
+
+            try:
+
+                i = int(i)
+                operators.append(i)
+
+
+                
+                #print 'subtraction results: ', subtract_results
+
+            except ValueError:
+                url.remove(i)
+                body = "It looks like you used an invalid input!"
+
+                return body
+
+        body = 'The difference is: {}'.format(str(operators[0] - sum(operators[1:])))#, str(type(sum(operators[1:])))
+
+    else: 
+        body = 'The URL is: {}'.format(url)
 
     print 'url is ', url
     return body
@@ -29,7 +62,10 @@ def application(environ, start_response):
         
         path = list(path.split('/'))
 
+        path[0] = '/'
+
         print 'path is: ', path
+        print 'path type is: ', type(path)
 
         body = resolve_url(path)
         print 'body is ', body
@@ -39,9 +75,9 @@ def application(environ, start_response):
         #body = "<h1>Testing Testing</h1>"
         status = "200 OK"
 
-    except NameError:
-        status = "404 Not Found"
-        body = "<h1>Not Found</h1>"
+    #except NameError:
+    #    status = "404 Not Found"
+    #    body = "<h1>Not Found</h1>"
     #except Exception:
     #    status = "500 Internal Server Error"
     #    body = "<h1>Internal Server Error</h1>"

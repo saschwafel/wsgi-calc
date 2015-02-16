@@ -8,6 +8,11 @@ def resolve_url(path):
 
     operators = []
 
+
+    path = filter(None, path)
+
+
+
     if url[1] == 'add':
 
         for i in url[2:]:
@@ -18,11 +23,13 @@ def resolve_url(path):
             except ValueError:
                 url.remove(i)
 
-                body = "It looks like you used an invalid input!"
+                raise ValueError
+                #body = "It looks like you used an invalid input!"
 
-                return body
+                #return body
 
-        body = 'The list of operands is: {}, and the sum is: {}'.format(str(operators), str(sum(operators)))
+        #body = 'The list of operands is: {}, and the sum is: {}'.format(str(operators), str(sum(operators)))
+        body = '<h1>The sum is: {}</h1>'.format(str(sum(operators)))
 
     elif url[1] == 'subtract':
         
@@ -38,12 +45,13 @@ def resolve_url(path):
                 #print 'subtraction results: ', subtract_results
 
             except ValueError:
-                url.remove(i)
-                body = "It looks like you used an invalid input!"
+                raise NameError
+                #url.remove(i)
+                #body = "It looks like you used an invalid input!"
 
-                return body
+                #return body
 
-        body = 'The difference is: {}'.format(str(operators[0] - sum(operators[1:])))#, str(type(sum(operators[1:])))
+        body = '<h1>The difference is: {}</h1>'.format(str(operators[0] - sum(operators[1:])))#, str(type(sum(operators[1:])))
 
     elif url[1] == 'multiply':
         
@@ -55,17 +63,48 @@ def resolve_url(path):
                 operators.append(i)
 
             except ValueError:
-                url.remove(i)
-                body = "It looks like you used an invalid input!"
+                #url.remove(i)
+                #body = "It looks like you used an invalid input!"
 
-                return body
+                #return body
+                raise ValueError
 
         product = operators[0]*operators[1]
 
         product = str(product)
 
-        body = 'The product is: {}'.format(product)
-        #body = str(operators)
+        body = '<h1>The product is: {</h1>}'.format(product)
+
+    elif url[1] == 'divide':
+        
+        for i in url[2:4]:
+
+            try:
+
+                i = float(i)
+                operators.append(i)
+
+            except ValueError:
+                #url.remove(i)
+                raise ValueError
+
+        try: 
+
+            quotient = operators[0]/operators[1]
+
+            body = '<h1>The quotient is: {}</h1>'.format(quotient)
+
+        except ZeroDivisionError:
+            
+            #body = "It looks like you tried to divide by zero, now the world is ending. Nice job. I hope you're happy. "
+
+            raise ValueError
+                            
+
+    elif str(path) == "['/']":
+        index = open('index.html','rb')
+        body = index.read()
+        #body = 'bananas'
 
     else: 
         body = 'The URL is: {}'.format(url)
@@ -80,14 +119,15 @@ def application(environ, start_response):
         path = environ.get('PATH_INFO', None)
         if path is None:
             raise NameError
-        print 'path is: ', path
+        #print 'path is: ', path
+ 
         
         path = list(path.split('/'))
 
         path[0] = '/'
 
         print 'path is: ', path
-        print 'path type is: ', type(path)
+#        print 'path type is: ', type(path)
 
         body = resolve_url(path)
         print 'body is ', body
@@ -97,12 +137,15 @@ def application(environ, start_response):
         #body = "<h1>Testing Testing</h1>"
         status = "200 OK"
 
-    #except NameError:
-    #    status = "404 Not Found"
-    #    body = "<h1>Not Found</h1>"
-    #except Exception:
-    #    status = "500 Internal Server Error"
-    #    body = "<h1>Internal Server Error</h1>"
+    except NameError:
+        status = "404 Not Found"
+        body = "<h1>Not Found</h1>"
+    except ValueError:
+        status = "400 Not Found"
+        body = "<h1>Bad Request</h1><br / ><h2>Maybe you used an invalid input?</h2>"
+    except Exception:
+        status = "500 Internal Server Error"
+        body = "<h1>Internal Server Error</h1>"
     finally:
         headers.append(('Content-length', str(len(body))))
         start_response(status, headers)
